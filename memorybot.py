@@ -6,8 +6,7 @@ from langchain.callbacks import get_openai_callback
 import os
 
 # TODO :
-# faire une popup de configuration (nom du bot, preprompt, ou rôle)
-# faire le prompt en fonction du rôle
+# faire le prompt en fonction du rôle et du preprompt
 # faire pareil sur plusieurs conversations, plusieurs assistants accessibles via le volet
 
 
@@ -40,30 +39,36 @@ def get_text():
 
 def toggle_settings():
     st.session_state["settings"] = not st.session_state["settings"]
-    
+
+name = "Assistant dictionnaire"
+description = "Assistant donnant la définition détaillée d'un mot"
+role="En tant que professeur de français"
+preprompt="donne moi la définition détaillée du mot"
+
+
 st.title("Challenge IA Générative")
 
 col1, col2 = st.columns([12,1])
 
 with col1:
     if st.session_state["settings"]:
-        st.text_input("",placeholder="Nom de l'assistant")
+        name = st.text_input("",name,placeholder="Nom de l'assistant")
     else:
-        st.subheader("Nom")
+        st.subheader(name)
 
 with col2:
     st.button("⚙️", "settings_button", on_click=toggle_settings)
 
 if st.session_state["settings"]:
-    st.text_area("",placeholder="Description de l'assistant")
+   description = st.text_area("",description,placeholder="Description de l'assistant")
 else:
-    st.text("description")
+    st.text(description)
 
 if st.session_state["settings"]:
-        st.text_area("",placeholder="Rôle : répond moi en tant que ...")
+       role = st.text_area("",role,placeholder="Rôle : répond moi en tant que ...")
 
 if st.session_state["settings"]:
-        st.text_area("",placeholder="Instructions : donne moi la définition de")
+       preprompt = st.text_area("",preprompt,placeholder="Instructions : donne moi la définition de")
 
 
 with st.sidebar:
