@@ -22,27 +22,49 @@ if "input" not in st.session_state:
     st.session_state["input"] = ""
 if "temp" not in st.session_state:
     st.session_state["temp"] = ""
+if "settings" not in st.session_state:
+    st.session_state["settings"] = False
 
 def clear_text():
     st.session_state["temp"] = st.session_state["input"]
     st.session_state["input"] = ""
 
 def get_text():
-    input_text = st.text_input("You: ", st.session_state["input"], key="input", 
+    if not st.session_state["settings"]:
+        input_text = st.text_input("You: ", st.session_state["input"], key="input", 
                             placeholder="Your AI assistant here! Ask me anything ...", 
                             on_change=clear_text,    
                             label_visibility='hidden')
     input_text = st.session_state["temp"]
     return input_text
+
+def toggle_settings():
+    st.session_state["settings"] = not st.session_state["settings"]
     
 st.title("Challenge IA Générative")
 
 col1, col2 = st.columns([12,1])
 
 with col1:
-    st.subheader("AI Assitant A")
+    if st.session_state["settings"]:
+        st.text_input("",placeholder="Nom de l'assistant")
+    else:
+        st.subheader("Nom")
+
 with col2:
-    st.button("⚙️", "settings_button")
+    st.button("⚙️", "settings_button", on_click=toggle_settings)
+
+if st.session_state["settings"]:
+    st.text_area("",placeholder="Description de l'assistant")
+else:
+    st.text("description")
+
+if st.session_state["settings"]:
+        st.text_area("",placeholder="Rôle : répond moi en tant que ...")
+
+if st.session_state["settings"]:
+        st.text_area("",placeholder="Instructions : donne moi la définition de")
+
 
 with st.sidebar:
     st.button("AI-ssistant A", use_container_width= True)
