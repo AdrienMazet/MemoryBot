@@ -5,6 +5,11 @@ from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
 import os
 
+# TODO :
+# faire une popup de configuration (nom du bot, preprompt, ou rôle)
+# faire le prompt en fonction du rôle
+# faire pareil sur plusieurs conversations, plusieurs assistants accessibles via le volet
+
 
 # Set Streamlit page configuration
 st.set_page_config(page_title='Challenge IA Générative', layout='wide')
@@ -31,7 +36,13 @@ def get_text():
     return input_text
     
 st.title("Challenge IA Générative")
-st.subheader("AI Assitant A")
+
+col1, col2 = st.columns([12,1])
+
+with col1:
+    st.subheader("AI Assitant A")
+with col2:
+    st.button("⚙️", "settings_button")
 
 with st.sidebar:
     st.button("AI-ssistant A", use_container_width= True)
