@@ -5,17 +5,11 @@ from langchain.llms import OpenAI
 from langchain.callbacks import get_openai_callback
 import os
 
-# TODO :
-# faire le prompt en fonction du rôle et du preprompt
-# faire pareil sur plusieurs conversations, plusieurs assistants accessibles via le volet
-
 assistants = [
     {'name':'Développeur python','description':'Écris la fonction demandée en python','role':'En tant que développeur confirmé, ','preprompt':'écris moi le code python '},
     {'name':"Vérificateur d'accessibilité",'description':"Vérifie si les bonnes pratiques d'accessibilité sont respectées dans un code html",'role':"En tant que développeur formé à l'accessibilité, ",'preprompt':"dis moi ce qui peut être amélioré en termes d'accessibilité dans le code suivant "},
     {'name':'Testeur JS Jest','description':"Écris le test jest associé à une fonction donnée",'role':"En tant que testeur aggueri, ",'preprompt':"écris le test associé à la fonction suivante, en utilisant le framework de test jest et le language de programmation JavaScript "}
 ]
-
-currentAssistant = 0
 
 # Set Streamlit page configuration
 st.set_page_config(page_title='Challenge IA Générative', layout='wide')
@@ -30,6 +24,8 @@ if "temp" not in st.session_state:
     st.session_state["temp"] = ""
 if "settings" not in st.session_state:
     st.session_state["settings"] = False
+if "currentAssistant" not in st.session_state:
+    st.session_state["currentAssistant"] = 0
 
 def clear_text():
     st.session_state["temp"] = st.session_state["input"]
@@ -47,9 +43,12 @@ def get_text():
 def toggle_settings():
     st.session_state["settings"] = not st.session_state["settings"]
 
+def change_assistant(index):
+    st.session_state["currentAssistant"] = index
+
 with st.sidebar:
-    for assistant in assistants:
-        st.button(assistant["name"], use_container_width= True)
+    for index, assistant in enumerate(assistants):
+        st.button(assistant["name"], use_container_width= True, on_click=change_assistant, args=(index,))
 
 st.title("Challenge IA Générative")
 
@@ -57,24 +56,24 @@ col1, col2 = st.columns([12,1])
 
 with col1:
     if st.session_state["settings"]:
-        assistants[currentAssistant]["name"] = st.text_input("",assistants[currentAssistant]["name"],placeholder="Nom de l'assistant")
+        assistants[st.session_state["currentAssistant"]]["name"] = st.text_input("",assistants[st.session_state["currentAssistant"]]["name"],placeholder="Nom de l'assistant")
     else:
-        st.subheader(assistants[currentAssistant]["name"])
+        st.subheader(assistants[st.session_state["currentAssistant"]]["name"])
 
 with col2:
     st.button("⚙️", "settings_button", on_click=toggle_settings)
 
 if st.session_state["settings"]:
-   assistants[currentAssistant]["description"] = st.text_area("",assistants[currentAssistant]["description"],placeholder="Description de l'assistant")
+   assistants[st.session_state["currentAssistant"]]["description"] = st.text_area("",assistants[st.session_state["currentAssistant"]]["description"],placeholder="Description de l'assistant")
 else:
-    st.text(assistants[currentAssistant]["description"])
+    st.text(assistants[st.session_state["currentAssistant"]]["description"])
 
 if st.session_state["settings"]:
-    assistants[currentAssistant]["role"] = st.text_area("",assistants[currentAssistant]["role"],placeholder="Rôle : répond moi en tant que ...")
-    assistants[currentAssistant]["preprompt"] = st.text_area("",assistants[currentAssistant]["preprompt"],placeholder="Instructions : donne moi la définition de")
+    assistants[st.session_state["currentAssistant"]]["role"] = st.text_area("",assistants[st.session_state["currentAssistant"]]["role"],placeholder="Rôle : répond moi en tant que ...")
+    assistants[st.session_state["currentAssistant"]]["preprompt"] = st.text_area("",assistants[st.session_state["currentAssistant"]]["preprompt"],placeholder="Instructions : donne moi la définition de")
 
 
-os.environ['OPENAI_API_KEY'] = ''
+os.environ['OPENAI_API_KEY'] = 'sk-'
 llm = OpenAI(temperature=0, model_name="gpt-3.5-turbo", verbose=False) 
         
 # Create the ConversationChain object with the specified configuration
@@ -85,7 +84,7 @@ user_input = get_text()
 # Generate the output using the ConversationChain object and the user input, and add the input/output to the session
 if user_input:
     with get_openai_callback() as cb:
-        output = Conversation.run(input=assistants[currentAssistant]["role"] + assistants[currentAssistant]["preprompt"] + user_input)
+        output = Conversation.run(input=assistants[st.session_state["currentAssistant"]]["role"] + assistants[st.session_state["currentAssistant"]]["preprompt"] + user_input)
         st.session_state.past.append(user_input)  
         st.session_state.generated.append(output) 
         
